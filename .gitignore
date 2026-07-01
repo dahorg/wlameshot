@@ -1,0 +1,21 @@
+build/
+*.pro.user
+*.qmlproject.user
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.log
+
+# Ignore generated .desktop files, but keep the packaged one under data/
+*.desktop
+!data/app/*.desktop
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+.cache/
+compile_commands.json
