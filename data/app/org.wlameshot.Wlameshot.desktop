@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Wlameshot
+Comment=Powerful screenshot tool for Wayland
+Exec=wlameshot --gui
+Icon=org.wlameshot.Wlameshot
+Terminal=false
+Type=Application
+Categories=Graphics;Photography;
+Keywords=screenshot;capture;print screen;
+StartupNotify=true
