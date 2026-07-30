@@ -73,6 +73,7 @@ private:
         QString text;           // text tool (may contain '\n')
         QColor color;
         int penWidth = 3;
+        int mosaicBlock = 12;   // blur block size, in logical units
         int number = 0;         // numbered marker
     };
 
@@ -106,7 +107,7 @@ private:
     // Bakes one annotation into a device-pixel image (used to build m_flattened).
     void bakeAnnotation(QImage &target, const Annotation &annotation) const;
     void rebuildFlattened();
-    QImage mosaic(const QImage &source, const QRect &pixelRegion) const;
+    QImage mosaic(const QImage &source, const QRect &pixelRegion, int block) const;
 
     QImage m_screenshot;
     // m_screenshot with every committed annotation baked in, at device-pixel
@@ -121,6 +122,7 @@ private:
     Tool m_tool = Tool::None;
     QColor m_color;
     int m_penWidth = 3;
+    int m_mosaicBlock = 12; // blur block size; set from kMosaicBlock in the ctor
     QList<Annotation> m_annotations;
     QList<Annotation> m_redoStack;
     int m_nextNumber = 1;

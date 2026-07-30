@@ -92,7 +92,8 @@ Other input:
 
 | Action | Input |
 | --- | --- |
-| Change pen/line thickness | Scroll wheel (while a tool is active) |
+| Change pen/line thickness | Scroll wheel (while a drawing tool is active) |
+| Change blur block size | Scroll wheel (while the blur tool is active) |
 | Constrain a shape to a square/circle | Hold `Shift` while dragging |
 | Nudge the selection | Arrow keys (`Shift` = 10px steps) |
 | Copy immediately | Double-click inside the selection |

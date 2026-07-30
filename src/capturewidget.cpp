@@ -35,7 +35,9 @@ const int kPenWidth = 3;
 const int kMinPenWidth = 1;
 const int kMaxPenWidth = 30;
 const int kTextPixelSize = 22;
-const int kMosaicBlock = 12;          // blur block size, in logical units
+const int kMosaicBlock = 12;          // default blur block size, in logical units
+const int kMinMosaicBlock = 2;
+const int kMaxMosaicBlock = 64;
 
 struct Swatch { const char *hex; };
 const Swatch kColors[] = {
@@ -55,7 +57,8 @@ QPoint squared(const QPoint &from, const QPoint &to)
 CaptureWidget::CaptureWidget(const QImage &screenshot, QWidget *parent)
     : QWidget(parent),
       m_screenshot(screenshot),
-      m_color(QColor(kColors[0].hex))
+      m_color(QColor(kColors[0].hex)),
+      m_mosaicBlock(kMosaicBlock)
 {
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_TranslucentBackground);
@@ -151,7 +154,7 @@ void CaptureWidget::buildToolbar()
     addTool("T", "Text (T) — Shift+Enter for a new line, click text to re-edit", Tool::Text);
     addTool("▬", "Highlight (H)", Tool::Highlight);
     addTool("①", "Numbered marker (N)", Tool::Number);
-    addTool("▓", "Blur (B)", Tool::Blur);
+    addTool("▓", "Blur (B) — scroll to resize the blocks", Tool::Blur);
 
     auto *sep1 = new QFrame(m_toolbar);
     sep1->setFrameShape(QFrame::VLine);
@@ -439,6 +442,7 @@ void CaptureWidget::mousePressEvent(QMouseEvent *event)
                 m_current.tool = m_tool;
                 m_current.color = m_color;
                 m_current.penWidth = m_penWidth;
+                m_current.mosaicBlock = m_mosaicBlock;
                 m_current.p1 = pos;
                 m_current.p2 = pos;
                 if (m_tool == Tool::Pen) {
@@ -635,9 +639,17 @@ void CaptureWidget::wheelEvent(QWheelEvent *event)
 
     const int steps = event->angleDelta().y() / 120;
     if (steps != 0) {
-        m_penWidth = qBound(kMinPenWidth, m_penWidth + steps, kMaxPenWidth);
-        if (m_drag == Drag::Draw) {
-            m_current.penWidth = m_penWidth;
+        if (m_tool == Tool::Blur) {
+            // Two units per notch: the useful range is wider than the pen's.
+            m_mosaicBlock = qBound(kMinMosaicBlock, m_mosaicBlock + steps * 2, kMaxMosaicBlock);
+            if (m_drag == Drag::Draw) {
+                m_current.mosaicBlock = m_mosaicBlock;
+            }
+        } else {
+            m_penWidth = qBound(kMinPenWidth, m_penWidth + steps, kMaxPenWidth);
+            if (m_drag == Drag::Draw) {
+                m_current.penWidth = m_penWidth;
+            }
         }
         update();
     }
@@ -807,14 +819,14 @@ void CaptureWidget::cancelText()
 // Painting
 // ---------------------------------------------------------------------------
 
-QImage CaptureWidget::mosaic(const QImage &source, const QRect &pixelRegion) const
+QImage CaptureWidget::mosaic(const QImage &source, const QRect &pixelRegion, int block) const
 {
     const QRect r = pixelRegion.normalized() & source.rect();
     if (r.isEmpty()) {
         return QImage();
     }
     // Keep the blocks a constant size on screen regardless of display scaling.
-    const int factor = qMax(2, qRound(kMosaicBlock * m_scale));
+    const int factor = qMax(2, qRound(qBound(kMinMosaicBlock, block, kMaxMosaicBlock) * m_scale));
     const QImage sub = source.copy(r);
     const QImage small = sub.scaled(qMax(1, r.width() / factor), qMax(1, r.height() / factor),
                                     Qt::IgnoreAspectRatio, Qt::FastTransformation);
@@ -869,7 +881,7 @@ void CaptureWidget::drawAnnotation(QPainter &painter, const Annotation &a,
         // Only reached for the in-progress preview; committed blurs go through
         // bakeAnnotation(), which samples the image it is drawing into.
         const QRect pixels = imageRect(QRect(a.p1, a.p2).normalized()) & blurSource.rect();
-        const QImage px = mosaic(blurSource, pixels);
+        const QImage px = mosaic(blurSource, pixels, a.mosaicBlock);
         if (!px.isNull()) {
             painter.drawImage(widgetRect(pixels), px);
         }
@@ -919,7 +931,7 @@ void CaptureWidget::bakeAnnotation(QImage &target, const Annotation &a) const
         // over earlier annotations obscures them instead of restoring the
         // original pixels underneath.
         const QRect pixels = imageRect(QRect(a.p1, a.p2).normalized()) & target.rect();
-        const QImage px = mosaic(target, pixels);
+        const QImage px = mosaic(target, pixels, a.mosaicBlock);
         if (px.isNull()) {
             return;
         }
@@ -992,10 +1004,13 @@ void CaptureWidget::paintEvent(QPaintEvent *)
         }
 
         // Report the size of what will actually be written out (device pixels),
-        // plus the pen width, which is otherwise invisible until you draw.
+        // plus the scroll-adjustable brush size, which is otherwise invisible
+        // until you draw.
         const QSize out = imageRect(sel).size();
         QString label = QString("%1 x %2").arg(out.width()).arg(out.height());
-        if (m_tool != Tool::None) {
+        if (m_tool == Tool::Blur) {
+            label += QString("  •  blocks %1").arg(m_mosaicBlock);
+        } else if (m_tool != Tool::None) {
             label += QString("  •  pen %1").arg(m_penWidth);
         }
         const QFontMetrics fm(painter.fontMetrics());

@@ -111,7 +111,7 @@ tool active to move it), then annotate:
 | `Ctrl+S` | Save to PNG |
 | `Enter` / `Ctrl+C` | Copy to clipboard |
 | `Esc` | Cancel |
-| Scroll wheel | Pen/line thickness (while a tool is active) |
+| Scroll wheel | Pen/line thickness, or blur block size with `B` active |
 | `Shift` + drag | Constrain a shape to a square/circle |
 | Arrow keys | Nudge the selection (`Shift` = 10px) |
 | Double-click | Copy the selection immediately |
