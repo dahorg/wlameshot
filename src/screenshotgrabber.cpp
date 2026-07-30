@@ -22,7 +22,9 @@ QImage ScreenshotGrabber::grabScreen(int screenIndex)
 
     const QList<QScreen *> screens = app->screens();
     if (screenIndex < 0 || screenIndex >= screens.size()) {
-        return grabFullscreen();
+        qWarning() << "screen index" << screenIndex << "is out of range; this system has"
+                   << screens.size() << "screen(s)";
+        return QImage();
     }
 
     QScreen *screen = screens[screenIndex];
@@ -103,18 +105,4 @@ QImage ScreenshotGrabber::grabViaGrim(const QString &output) const
         return QImage();
     }
     return image;
-}
-
-QList<QRect> ScreenshotGrabber::availableGeometries() const
-{
-    QList<QRect> geometries;
-    QGuiApplication *app = static_cast<QGuiApplication *>(QCoreApplication::instance());
-    if (!app) {
-        return geometries;
-    }
-
-    for (QScreen *screen : app->screens()) {
-        geometries.append(screen->geometry());
-    }
-    return geometries;
 }

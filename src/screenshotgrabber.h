@@ -15,18 +15,13 @@ public:
     explicit ScreenshotGrabber(QObject *parent = nullptr);
     ~ScreenshotGrabber();
 
+    // Captures one output by index. Returns a null image if the index is out
+    // of range -- callers should validate and report, rather than silently
+    // receiving a different screen than they asked for.
     QImage grabScreen(int screenIndex);
     QImage grabFullscreen();
-    QList<QRect> availableGeometries() const;
-
-signals:
-    void captureComplete(const QImage &image);
 
 private:
-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
-    QScreen *primaryScreen() const;
-#endif
-
     // Native Qt capture. Returns a null image on Wayland (wlroots/GNOME
     // reject QScreen::grabWindow), which triggers the grim fallback below.
     QImage grabViaQt(const QRect &region = QRect()) const;

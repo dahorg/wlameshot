@@ -55,8 +55,11 @@ wlameshot --gui
 # Capture fullscreen
 wlameshot --full
 
-# Capture specific screen
+# Capture specific screen (by index; errors if the index doesn't exist)
 wlameshot --screen 0
+
+# Write to a file instead of the clipboard (works with --gui too)
+wlameshot --full --output shot.png
 ```
 
 ### GUI mode: annotating
@@ -76,9 +79,27 @@ tools; pick a color, draw inside the selection, then copy or save.
 | Numbered marker (click to place) | `N` |
 | Blur / pixelate | `B` |
 | Undo last annotation | `Ctrl+Z` |
+| Redo | `Ctrl+Shift+Z` or `Ctrl+Y` |
 | Save to PNG | `Ctrl+S` |
-| Copy to clipboard | `Enter` |
+| Copy to clipboard | `Enter` or `Ctrl+C` |
 | Cancel | `Esc` |
+
+Pressing a tool's key again (or clicking its button, or right-clicking the
+canvas) puts the tool away, which is how you get back to moving the selection
+by its interior.
+
+Other input:
+
+| Action | Input |
+| --- | --- |
+| Change pen/line thickness | Scroll wheel (while a tool is active) |
+| Constrain a shape to a square/circle | Hold `Shift` while dragging |
+| Nudge the selection | Arrow keys (`Shift` = 10px steps) |
+| Copy immediately | Double-click inside the selection |
+| Custom color / put the tool away | Right-click the canvas |
+| New line in a text box | `Shift+Enter` |
+| Re-edit existing text | Click it with the text tool active |
+| Paste into a text box | `Ctrl+V` |
 
 Colors are chosen from the toolbar swatches or the 🎨 custom-color picker.
 

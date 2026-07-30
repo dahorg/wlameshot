@@ -76,13 +76,20 @@ wlameshot --gui
 # Capture fullscreen and copy to clipboard
 wlameshot --full
 
-# Capture a specific screen by index
+# Capture a specific screen by index (errors if the index doesn't exist)
 wlameshot --screen 0
+
+# Write to a file instead of the clipboard (works with --gui too)
+wlameshot --full --output shot.png
 
 # Show help / version
 wlameshot --help
 wlameshot --version
 ```
+
+Exit status is `0` on success and `1` on failure (capture failed, bad
+`--screen` index, clipboard handoff failed, or the file could not be written),
+so it is safe to use in scripts.
 
 ## In-app shortcuts (GUI mode)
 
@@ -100,9 +107,20 @@ tool active to move it), then annotate:
 | `N` | Numbered marker (click to place) |
 | `B` | Blur / pixelate |
 | `Ctrl+Z` | Undo last annotation |
+| `Ctrl+Shift+Z` / `Ctrl+Y` | Redo |
 | `Ctrl+S` | Save to PNG |
-| `Enter` | Copy to clipboard |
+| `Enter` / `Ctrl+C` | Copy to clipboard |
 | `Esc` | Cancel |
+| Scroll wheel | Pen/line thickness (while a tool is active) |
+| `Shift` + drag | Constrain a shape to a square/circle |
+| Arrow keys | Nudge the selection (`Shift` = 10px) |
+| Double-click | Copy the selection immediately |
+| Right-click | Put the tool away, or open the color picker |
+| `Shift+Enter` | New line inside a text box |
+
+Pressing a tool key a second time puts the tool away, which is how you get back
+to moving the selection by its interior. With the text tool active, clicking
+existing text reopens it for editing.
 
 ## Desktop integration (Hyprland / omarchy)
 
